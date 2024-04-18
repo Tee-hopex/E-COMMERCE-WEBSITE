@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const itemSchema = new mongoose.Schema({
     productname: String,
-    img_url: String,
-    img_id: String,
+    productinfo: String,
+    number_in_stock: {type: Number, default: 1},
+    img_url: [String],
+    img_id: [String],
     cart_id: String,
-    cart_item: [String],
     price: Number,
+    reviews: [String],
     rating: number,
     likes: [String],
     like_count: Number,
@@ -16,5 +18,5 @@ const userSchema = new mongoose.Schema({
     card_id : [String],    
 }, {collection: 'items'});
 
-const model = mongoose.model('Item', userSchema);
+const model = mongoose.model('Item', itemSchema);
 module.exports = model;

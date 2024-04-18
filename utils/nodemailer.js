@@ -56,14 +56,14 @@ const sendOTP = async (email, otp) => {
   try{
     const info = await transport
       .sendMail({
-        from: `afolionhopex@gmail.com <${process.env.MAIL_USER}>`,
+        from: `HOPE'S E-COMMERCE WEB-SERVICE <${process.env.MAIL_USER}>`,
         to: email,
         subject: "One Time Password",
         html: `<p style="line-height: 1.5">
         Your OTP verification code is: <br /> <br />
         <font size="3">${otp}</font> <br />
         Best regards,<br />
-        Hope's app.
+        E-COMMERCE WEBSITE.
         </p>
         </div>`,
       });
