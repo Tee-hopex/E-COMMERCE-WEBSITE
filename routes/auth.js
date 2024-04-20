@@ -42,9 +42,8 @@ route.post('/sign_up', async (req, res) => {
         user.address = [];
         user.saved_item = [];
         user.card = [];
-        // user.pending_order = [];
-        // user.delivered_order = [];
-        // user.cancelled_order = [];
+        user.orders = [];
+       
 
         // save my document on mongodb
         await user.save();
@@ -86,7 +85,9 @@ route.post('/login', async (req, res) => {
                 _id: user._id,
                 email: user.email,
                 username: user.username
-            }, process.env.JWT_SECRET, {expiresIn: '30m'});
+            }, process.env.JWT_SECRET, 
+            // {expiresIn: '30m'}
+        );
 
             // update user document online status
             user.is_online = true;
@@ -136,6 +137,8 @@ route.post('/login', async (req, res) => {
 
      
 // })
+
+
 
 // endpont to logout
 route.post('/logout', async (req, res) => {

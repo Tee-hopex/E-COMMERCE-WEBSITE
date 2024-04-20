@@ -20,12 +20,13 @@ con.on('disconnected', error => {
 
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 app.use(express.json());
 
 app.use('/auth', require('./routes/auth'))
 app.use('/profile', require('./routes/profile'))
+app.use('/cart', require('./routes/cart'))
 
 
 
