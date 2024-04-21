@@ -1,64 +1,54 @@
 const express = require('express');
-const bcrypt = require('bcryptjs'); //allows for encrypting specific data
 const jwt = require('jsonwebtoken'); // allows us to generate a new token from a given information entered
 
 require('dotenv').config();
 
 const User = require('../Model/user');
 const Order = require('../Model/order')
-
-// const cloudinary = require('../utils/cloudinary');
-// const uploader = require("../utils/multer");
+const Cart = require('../Model/cart')
 
 const route = express.Router();
-// const {sendPasswordReset, sendOTP} = require('../utils/nodemailer')
-
 
 //  endpoint for new item entry
 route.post('/place_order', async (req, res) => {
-    const { token,item_id, item_name, color,item_cost, item_img_url ,delivery_fee, discount, number_ordered, } = req.body; // Destructuring the request body
+    const { token, cart_id, delivery_fee} = req.body; // Destructuring the request body
 
-    if (!token) return res.status(400).send({status: "Error", msg: "token required"})
+    if (!token) return res.status(400).send({status: "Error", msg: "token required"});
     // Checking if any required field is missing
-    if (!item_name || !item_id || !item_cost || !delivery_fee || !color ||item_img_url) {
+    if (!cart_id, !delivery_fee) {
         return res.status(400).send({ "status": "error", "msg": "All required field must be filled" });
-    }
+    };
 
     try {
-        // percentageCalculator function to help run the calculation
-        function percentageCalculator (item_cost, discount, ){
-            const discount_amount = (item_cost * (discount / 100))
-            return (item_cost - discount_amount)
-         }
-         const discounted_cost = percentageCalculator(item_cost, discount)
-         const total = ((discounted_cost * number_ordered) - delivery_fee)
-        
         //token verification
-        const user = jwt.verify(token, process.env.JWT_SECRET)
-        if(!user) return res.status(400).send({status: "Error", msg: "invalid token"})
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        if(!user) return res.status(400).send({status: "Error", msg: "invalid token"});
             
+        const cart = await Cart.findById(cart_id);
+
+        const total = cart.total + delivery_fee;
+                       
         // create order document
         const order = new Order();
         order.user_id = user._id;
-        order.item_name = item_name;
-        order.item_id = item_id;
-        order.color = color;
-        order.item_cost = item_cost;
-        order.item_img_url = item_img_url || "";
-        order.item_img_id = item_img_id || "";
-        order.discount = discount;
-        order.discounted_cost = discounted_cost; 
-        order.delivery_fee = delivery_fee;          
-        order.number_ordered = number_ordered;
+        order.cart_id = cart_id;
+        order.items = cart.item;
+        order.delivery_fee = delivery_fee;
+        order.item_cost = cart.item_cost;
+        order.discount = cart.discount;
+        order.item_in_cart = cart.item_in_cart;
         order.total = total;
-
+        
         // save my document on mongodb
         await order.save();
 
         await User.findByIdAndUpdate(user._id, {
             $push : {orders: order._id},
-            $inc : {item_in_order: 1}
+            $inc : {order_count: 1}
         });
+
+        // clear the user cart for new order placements
+        await Cart.findByIdAndDelete(cart_id)
 
         return res.status(200).send({status: 'ok', msg: 'success', order});
 
@@ -68,6 +58,31 @@ route.post('/place_order', async (req, res) => {
         res.status(500).send({ "status": "some error occurred", "msg": error.message });
     }
 });
+
+// endpoint to remove from cart
+route.post('/remove', async(req, res) => {
+    const {token, cart_id, item_id} = req.body;
+
+    // Checking if any required field is missing
+    if (!token) return res.status(400).send({status: "Error", msg: "token required"})
+    if (!cart_id || !item_id) {
+        return res.status(400).send({ "status": "error", "msg": "All required field must be filled" });
+    }
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+
+        const cart = await Cart.findByIdAndUpdate(cart_id, {$pull: {item: {_id : item_id}}, $inc: {item_in_cart: -1}}, {new: true})
+
+        return res.status(200).send({status: "success", msg: "item removed from cart", cart})
+
+    } catch (error) {
+        console.error(error);
+        // Sending error response if something goes wrong
+        res.status(500).send({ "status": "some error occurred", "msg": error.message });
+    }
+
+})
 
 // endpoint to cancel order
 route.post('/cancel_order', async (req, res) => {
@@ -80,11 +95,11 @@ route.post('/cancel_order', async (req, res) => {
         const user = jwt.verify(token, process.env.JWT_SECRET);
         if (!user) return res.status({status: "Error", msg: "invalid token"});
 
-        const order = await Order.findByIdAndUpdate(order_id, {$set :{order_status : "cancelled" }}, {new:true})
+        const order = await Order.findByIdAndUpdate(order_id, {$set :{order_status : "cancelled" }}, {new:true});
 
-        await User.findByIdAndUpdate(user_id, {$pull : {orders: order_id}, $inc : {item_in_order: -1}})
+        await User.findByIdAndUpdate(user_id, {$pull : {orders: order_id}, $inc : {order_count: -1}});
 
-        return res.status(200).send({status: "Success", msg: "Order cancelled successfully", order})
+        return res.status(200).send({status: "Success", msg: "Order cancelled successfully", order});
 
         
     } catch (error) {
@@ -108,11 +123,11 @@ route.post('/delivered_order', async (req, res) => {
         const user = jwt.verify(token, process.env.JWT_SECRET);
         if (!user) return res.status({status: "Error", msg: "invalid token"});
 
-        const order = await Order.findByIdAndUpdate(order_id, {$set :{order_status : "cancelled" }}, {new:true})
+        const order = await Order.findByIdAndUpdate(order_id, {$set :{order_status : "delivered" }}, {new:true})
 
-        await User.findByIdAndUpdate(user_id, {$pull : {orders: order_id}, $inc : {item_in_order: -1}})
+        // await User.findByIdAndUpdate(user_id, {$pull : {orders: order_id}, $inc : {item_in_order: -1}})
 
-        return res.status(200).send({status: "Success", msg: "Order cancelled successfully", order})
+        return res.status(200).send({status: "Success", msg: "Order delivered successfully", order})
 
         
     } catch (error) {
@@ -124,8 +139,6 @@ route.post('/delivered_order', async (req, res) => {
         res.status(500).send({ "status": "some error occurred", "msg": error.message });
     }
 })
-
-
 
 
 module.exports = route;

@@ -1,11 +1,11 @@
 const express = require('express');
-const uuid = require('uuid');
 const bcrypt = require('bcryptjs'); //allows for encrypting specific data
 const jwt = require('jsonwebtoken'); // allows us to generate a new token from a given information entered
 
 require('dotenv').config();
 
 const User = require('../Model/user');
+const Cart = require('../Model/cart');
 const Address = require('../Model/address');
 
 const uploader = require("../utils/multer");
@@ -53,14 +53,16 @@ route.post('/delete_user', async(req,res)=>{
         const user = jwt.verify(token, process.env.JWT_SECRET);
         if (!user) return res.status(400).send({'status': 'Error', 'msg': 'invalid token'}) 
 
+        // delete all User's post objects
+        await Cart.deleteMany({user_id: user._id})
+    
         //update user is deleted
         const acct = await User.findByIdAndUpdate(user._id, {is_deleted: true})
 
         //delete User Object
     // await User.deleteOne({_id : user._id})
 
-    //delete all User's post objects
-    // await Post.deleteMany({user_id: user._id})
+    
 
     return res.status(200).send({'status': 'success', 'msg': 'user account has been deleted successfully' + acct})
 

@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     img_url: String,
     img_id: String,
     orders: [String],
-    item_in_order: Number,
+    order_count: Number,
     cart: String,
     item_in_cart: Number,
     address: [String],
