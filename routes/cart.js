@@ -1,5 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcryptjs'); //allows for encrypting specific data
 const jwt = require('jsonwebtoken'); // allows us to generate a new token from a given information entered
 
 require('dotenv').config();
@@ -36,13 +35,11 @@ route.post('/add_to_cart', async (req, res) => {
         if(!user) return res.status(400).send({status: "Error", msg: "invalid token"})
 
 
-        console.log(user._id)
          // check if the cart is empty.
-        const count = await Cart.findOne({user_id: user._id});
-    if (!count) {
+        const check = await Cart.findOne({user_id: user._id});
+    if (!check) {
       // create cart document
-      const cart = new Cart();
-        
+      const cart = new Cart();        
 
       // total number of items in cart
       const item_in_cart = number_ordered;
@@ -51,7 +48,7 @@ route.post('/add_to_cart', async (req, res) => {
           item_name : item_name,
           item_id : item_id,
           color : color,
-          item_cost : item_cost,
+          item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
           discount : discount,
           discounted_cost : discounted_cost,
@@ -65,7 +62,7 @@ route.post('/add_to_cart', async (req, res) => {
       // to calculate total item_cost of all the items in the cart
       var calculatedItemCost = 0;
       for (const item of cart.item) {
-          calculatedTotal += item.item_cost;
+        calculatedItemCost += item.item_cost;
       }
       cart.item_cost = calculatedItemCost;
 
@@ -79,35 +76,30 @@ route.post('/add_to_cart', async (req, res) => {
       // to calculate total discount of all the items in the cart
       var calculateddiscount = 0;
       for (const item of cart.item) {
-          calculatedTotal += item.total;
+        calculateddiscount += item.discount;
       }
       cart.discount = calculateddiscount;
 
       // save my document on mongodb
       await cart.save();
+
+    //   console.log(cart._id)
      
       // update user profile
       await User.findByIdAndUpdate(user._id, {
-          $set : {cart: cart._id},
-          $set : {item_in_cart: item_in_cart}
+          $set : {item_in_cart: item_in_cart},
+          $set : {cart: cart._id}
       });
 
       return res.status(200).send({status: 'ok', msg: 'success', cart});
-    } else if (count) {
+    } else if (check) {
         const cart = await Cart.findOne();
-
-        console.log(cart.item.number_ordered)
-
-       
-    
-
-
-      
+            
       cart.item.push({
           item_name : item_name,
           item_id : item_id,
           color : color,
-          item_cost : item_cost,
+          item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
           discount : discount,
           discounted_cost : discounted_cost,
@@ -128,7 +120,7 @@ route.post('/add_to_cart', async (req, res) => {
       // to calculate total item_cost of all the items in the cart
       var calculatedItemCost = 0;
       for (const item of cart.item) {
-          calculatedTotal += item.item_cost;
+        calculatedItemCost += item.item_cost;
       }
       cart.item_cost = calculatedItemCost;
 
@@ -142,7 +134,7 @@ route.post('/add_to_cart', async (req, res) => {
       // to calculate total discount of all the items in the cart
       var calculateddiscount = 0;
       for (const item of cart.item) {
-          calculatedTotal += item.total;
+        calculateddiscount += item.discount;
       }
       cart.discount = calculateddiscount;
 
@@ -158,7 +150,7 @@ route.post('/add_to_cart', async (req, res) => {
       return res.status(200).send({status: 'ok', msg: 'success', cart});
 
       
-    }
+    } else { return res.status(200).send({status: "Error", msg: "Error Occurred from my check"})}
         
                     
         

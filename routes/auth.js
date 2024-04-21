@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken'); // allows us to generate a new token from a
 require('dotenv').config();
 
 const User = require('../Model/user');
-// const Post = require('../models/post')
+const Cart = require('../Model/cart')
 
 const cloudinary = require('../utils/cloudinary');
 // const uploader = require("../utils/multer");
@@ -38,7 +38,7 @@ route.post('/sign_up', async (req, res) => {
         user.phone_no = phone_no;
         user.email = email;
         user.bookmark = [];
-        user.cart_item = [];
+        user.cart = "";
         user.address = [];
         user.saved_item = [];
         user.card = [];
@@ -70,12 +70,12 @@ route.post('/login', async (req, res) => {
         // check if user with that email exists in the database
         const user = await User.findOne({ email: email });
 
-        if (user.is_deleted == true) return res.status(400).send({status: "Error", msg : "User Account has been deleted." })
-
         // If user is not found, return error
         if (!user) {
             return res.status(400).send({ 'status': 'Error', 'msg': 'Incorrect email or phone number' });
         }
+
+        if (user.is_deleted == true) return res.status(400).send({status: "Error", msg : "User Account has been deleted." })
 
         // check if phone number is correct
         // if(await bcrypt.compare(password, user.password)) {
@@ -86,7 +86,7 @@ route.post('/login', async (req, res) => {
                 email: user.email,
                 username: user.username
             }, process.env.JWT_SECRET, 
-            // {expiresIn: '30m'}
+            {expiresIn: '30m'}
         );
 
             // update user document online status
@@ -201,14 +201,16 @@ route.post('/delete_user', async(req,res)=>{
         const user = jwt.verify(token, process.env.JWT_SECRET);
         if (!user) return res.status(400).send({'status': 'Error', 'msg': 'invalid token'}) 
 
+        // delete all User's post objects
+        await Cart.deleteMany({user_id: user._id})
+    
         //update user is deleted
         const acct = await User.findByIdAndUpdate(user._id, {is_deleted: true})
 
         //delete User Object
     // await User.deleteOne({_id : user._id})
 
-    //delete all User's post objects
-    // await Post.deleteMany({user_id: user._id})
+    
 
     return res.status(200).send({'status': 'success', 'msg': 'user account has been deleted successfully' + acct})
 

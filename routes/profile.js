@@ -51,13 +51,18 @@ route.post('/delete_user', async(req,res)=>{
     }
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET);
-
         if (!user) return res.status(400).send({'status': 'Error', 'msg': 'invalid token'}) 
 
+        //update user is deleted
+        const acct = await User.findByIdAndUpdate(user._id, {is_deleted: true})
+
         //delete User Object
-    await User.deleteOne({_id : user._id})
-   
-    return res.status(200).send({'status': 'success', 'msg': 'user deleted successfully'})
+    // await User.deleteOne({_id : user._id})
+
+    //delete all User's post objects
+    // await Post.deleteMany({user_id: user._id})
+
+    return res.status(200).send({'status': 'success', 'msg': 'user account has been deleted successfully' + acct})
 
 
     } catch (error) {
