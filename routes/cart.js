@@ -93,7 +93,7 @@ route.post('/add_to_cart', async (req, res) => {
 
       return res.status(200).send({status: 'ok', msg: 'success', cart});
     } else if (check) {
-        const cart = await Cart.findOne();
+        const cart = await Cart.findOne({user_id: user._id});
             
       cart.item.push({
           item_name : item_name,
@@ -143,7 +143,6 @@ route.post('/add_to_cart', async (req, res) => {
      
       // update user profile
       await User.findByIdAndUpdate(user._id, {
-          $set : {cart: cart._id},
           $set : {item_in_cart: calculatedItemInCart}
       });
 
