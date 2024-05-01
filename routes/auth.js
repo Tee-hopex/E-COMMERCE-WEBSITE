@@ -4,17 +4,12 @@ const jwt = require('jsonwebtoken'); // allows us to generate a new token from a
 
 require('dotenv').config();
 
-const User = require('../Model/user');
-const Cart = require('../Model/cart')
+const User = require('../models/user');
+const Cart = require('../models/cart');
 
-const cloudinary = require('../utils/cloudinary');
-// const uploader = require("../utils/multer");
-
-const route = express.Router();
 const {sendPasswordReset, sendOTP} = require('../utils/nodemailer')
 
-
-
+const route = express.Router();
 
 //  endpoint for user to signup
 route.post('/sign_up', async (req, res) => {
@@ -24,7 +19,6 @@ route.post('/sign_up', async (req, res) => {
     if (!password || !username || !email || !phone_no) {
         return res.status(400).send({ "status": "error", "msg": "All field must be filled" });
     }
-
     try {
         // check if username has been used to create an account before
         const found = await User.findOne({ username }, { username: 1, _id: 0 }).lean();
@@ -37,14 +31,12 @@ route.post('/sign_up', async (req, res) => {
         user.password = await bcrypt.hash(password, 10);
         user.phone_no = phone_no;
         user.email = email;
-        user.bookmark = [];
         user.cart = "";
         user.address = [];
         user.saved_item = [];
-        user.card = [];
+        user.card_details = [];
         user.orders = [];
        
-
         // save my document on mongodb
         await user.save();
 
@@ -107,38 +99,31 @@ route.post('/login', async (req, res) => {
     }
 });
 
-// // forgot password endpoint
-// route.post('/forgot_password', async (req,res)=>{
-//     const {email} = req.body;
+// forgot password endpoint
+route.post('/forgot_password', async (req,res)=>{
+    const {email, username, resetPasswordCode} = req.body;
 
-//     if (!email){
-//         return res.status(400).send({"status": "Error", "msg": "all fields must be filled"})
-//     }
-//     try{
-//         // check if user with email passed exist
-//         const user = await User.findOne({email:email})
+    if (!email || !username || !resetPasswordCode){
+        return res.status(400).send({"status": "Error", "msg": "all fields must be filled"})
+    }
+    try{
+        // check if user with email passed exist
+        const user = await User.findOne({email:email})
 
-//         // if phone_no passed matches user phone number
-//         if (user && user.phone_no === phone_no) {
-//             await User.updateOne({_id:user._id}, {password: await bcrypt.hash(password, 10)})
-            
-//             return res.status(200).send ({"Status": "success", "msg": "password has been changed", password})
+        // send reset password to email
+        sendPasswordReset(email, username, resetPasswordCode)
 
-//         } else if (user && user.phone_no !== phone_no) {     // if it doesn't match
-//             return res.status(400).send ({'status':'Error', 'msg': 'Phone number doesnt match ' + email})
-//         } else {
-//             return res.status(400).send({"status": "Error", "msg": "User does not exist"})
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         // Sending error response if something goes wrong
-//         res.status(500).send({ "status": "some error occurred", "msg": error.message });
-//     }
+        return res.status(200).send({status: "success", msg: "Reset password request has been sent to " + email})
+
+        
+    } catch (error) {
+        console.error(error);
+        // Sending error response if something goes wrong
+        res.status(500).send({ "status": "some error occurred", "msg": error.message });
+    }
 
      
-// })
-
-
+})
 
 // endpont to logout
 route.post('/logout', async (req, res) => {
@@ -225,6 +210,8 @@ route.post('/delete_user', async(req,res)=>{
     }
     
 })
+
+ 
 
 // // endpoint to send otp
 // route.post('/send_otp', async (req, res) => {

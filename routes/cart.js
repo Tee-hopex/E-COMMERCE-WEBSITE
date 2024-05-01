@@ -3,16 +3,14 @@ const jwt = require('jsonwebtoken'); // allows us to generate a new token from a
 
 require('dotenv').config();
 
-const User = require('../Model/user');
-const Cart = require('../Model/cart')
+const User = require('../models/user');
+const Cart = require('../models/cart')
 
 const route = express.Router();
 
-
 //  endpoint for new item entry
 route.post('/add_to_cart', async (req, res) => {
-    const {token,item_id, item_name, color,item_cost, item_img_url, discount, number_ordered} = req.body; // Destructuring the request body
-
+    const {token,item_name, color,item_cost, item_img_url, discount, number_ordered} = req.body; // Destructuring the request body
     
     // Checking if any required field is missing
     if (!token) return res.status(400).send({status: "Error", msg: "token required"})
@@ -35,7 +33,7 @@ route.post('/add_to_cart', async (req, res) => {
         if(!user) return res.status(400).send({status: "Error", msg: "invalid token"})
 
 
-         // check if the cart is empty.
+         // check if the Cart is empty.
         const check = await Cart.findOne({user_id: user._id});
     if (!check) {
       // create cart document
@@ -46,7 +44,6 @@ route.post('/add_to_cart', async (req, res) => {
     
       cart.item.push({
           item_name : item_name,
-          item_id : item_id,
           color : color,
           item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
@@ -97,7 +94,6 @@ route.post('/add_to_cart', async (req, res) => {
             
       cart.item.push({
           item_name : item_name,
-          item_id : item_id,
           color : color,
           item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
@@ -183,6 +179,30 @@ route.post('/remove', async(req, res) => {
         // Sending error response if something goes wrong
         res.status(500).send({ "status": "some error occurred", "msg": error.message });
     }
+
+})
+
+// endpoint to view cart
+route.post('/view_cart', async(req, res) => {
+  const {token} = req.body;
+
+  // Checking if any required field is missing
+  if (!token) return res.status(400).send({status: "Error", msg: "token required"})
+  
+  try {
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+
+      const profile = await User.findById(user._id)
+
+      const cart = await Cart.findById(profile.cart)
+
+      return res.status(200).send({status: "success", msg: "user cart is", cart})
+
+  } catch (error) {
+      console.error(error);
+      // Sending error response if something goes wrong
+      res.status(500).send({ "status": "some error occurred", "msg": error.message });
+  }
 
 })
 

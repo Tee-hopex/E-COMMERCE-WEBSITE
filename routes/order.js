@@ -1,11 +1,11 @@
 const express = require('express');
-const jwt = require('jsonwebtoken'); // allows us to generate a new token from a given information entered
+const jwt = require('jsonwebtoken'); 
 
 require('dotenv').config();
 
-const User = require('../Model/user');
-const Order = require('../Model/order')
-const Cart = require('../Model/cart')
+const User = require('../models/user');
+const Order = require('../models/order')
+const Cart = require('../models/cart')
 
 const route = express.Router();
 
@@ -112,7 +112,7 @@ route.post('/cancel_order', async (req, res) => {
     }
 })
 
-// endpoint for delivered order
+// endpoint to delivered order
 route.post('/delivered_order', async (req, res) => {
     const {order_id, token} = req.body;
 
@@ -139,6 +139,86 @@ route.post('/delivered_order', async (req, res) => {
         res.status(500).send({ "status": "some error occurred", "msg": error.message });
     }
 })
+
+// endpoint for viewing pending order
+route.post('/view_pending_order', async (req, res) => {
+    const {order_id, token} = req.body;
+
+    if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
+    if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
+
+    try{
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        if (!user) return res.status({status: "Error", msg: "invalid token"});
+
+        const order = await Order.find({order_status: "pending"})
+
+        return res.status(200).send({status: "Success", msg: "Your pending orders are", order})
+
+        
+    } catch (error) {
+        console.error(error);
+        if(error.name === 'JsonWebTokenError') {
+            return res.status(400).send({status: 'error', msg: 'Token verification failed'});
+        }
+        // Sending error response if something goes wrong
+        res.status(500).send({ "status": "some error occurred", "msg": error.message });
+    }
+})
+
+// endpoint for viewing cancelled order
+route.post('/view_cancelled_order', async (req, res) => {
+    const {order_id, token} = req.body;
+
+    if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
+    if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
+
+    try{
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        if (!user) return res.status({status: "Error", msg: "invalid token"});
+
+        const order = await Order.find({order_status: "cancelled"})
+
+        return res.status(200).send({status: "Success", msg: "Your cancelled orders are", order})
+
+        
+    } catch (error) {
+        console.error(error);
+        if(error.name === 'JsonWebTokenError') {
+            return res.status(400).send({status: 'error', msg: 'Token verification failed'});
+        }
+        // Sending error response if something goes wrong
+        res.status(500).send({ "status": "some error occurred", "msg": error.message });
+    }
+})
+
+// endpoint for viewing delivered order
+route.post('/view_delivered_order', async (req, res) => {
+    const {order_id, token} = req.body;
+
+    if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
+    if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
+
+    try{
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        if (!user) return res.status({status: "Error", msg: "invalid token"});
+
+        const order = await Order.find({order_status: "delivered"})
+
+        return res.status(200).send({status: "Success", msg: "Your delivered orders are", order})
+
+        
+    } catch (error) {
+        console.error(error);
+        if(error.name === 'JsonWebTokenError') {
+            return res.status(400).send({status: 'error', msg: 'Token verification failed'});
+        }
+        // Sending error response if something goes wrong
+        res.status(500).send({ "status": "some error occurred", "msg": error.message });
+    }
+})
+
+
 
 
 module.exports = route;

@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken'); // allows us to generate a new token from a
 
 require('dotenv').config();
 
-const User = require('../Model/user');
-const Item = require('../Model/item')
+const User = require('../models/user');
+const Item = require('../models/item')
 
 const cloudinary = require('../utils/cloudinary');
 const uploader = require("../utils/multer");

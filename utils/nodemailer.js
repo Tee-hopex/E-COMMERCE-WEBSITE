@@ -9,22 +9,21 @@ const transport = nodemailer.createTransport({
   },
 });
 
-const sendPasswordReset = async (email, fullname, resetPasswordCode) => {
+const sendPasswordReset = async (email, username, resetPasswordCode) => {
   try {
     const info = await transport.sendMail({
-      from: `MedStock`,
+      from: `HOPE'S E-COMMERCE WEB-SERVICE <${process.env.MAIL_USER}>`,
       to: email,
       subject: "Reset your password",
       html: `<div>
             <div style="display: flex; align-items: center;">
-                <img alt="Logo" style="height: 50px; margin-right: 8px; width: 50px;" src="https://drive.google.com/uc?export=view&id=1VxBysUQV0835JiijO4hs24M9A0rZ_Q-d">
-                <img alt="Heurekka" style="height: 30px; margin-right: 8px;" src="https://drive.google.com/uc?export=view&id=1REJbJrhQZakh4UD3gypU8OPa-A2RJVZA">
+                <img alt="Hope" style="height: 30px; margin-right: 8px;" src="https://res.cloudinary.com/dsyfkys0u/image/upload/v1712929359/nvrcuh4zvq7onpy1y7sw.png">
             </div>
             <br/>
-            <p style="line-height: 1.2;">Hi ${fullname},</p>
+            <p style="line-height: 1.2;">Hi ${username},</p>
             <p style="line-height: 1.2;">We've received a request to reset your password.</p>
             <p style="line-height: 1.5;">If you didn't make the request, just ignore this message. Otherwise, you can reset your password.</p>        
-            <a href=https://server-medstock.onrender.com/user_auth/reset_password/${resetPasswordCode}>
+            <a href="localhost:5000/profile/change_password${resetPasswordCode}">
                 <button style="font-weight: 500;font-size: 14px;cursor: pointer; background-color: rgba(238, 119, 36, 1); border: none; border-radius: 4px; padding: 12px 18px 12px 18px; color: white;">
                     Reset your password
                 </button>
@@ -32,16 +31,14 @@ const sendPasswordReset = async (email, fullname, resetPasswordCode) => {
             <br/>
             <br/>
             <p  style="line-height: 0.2;">Thanks!</p>
-            <p  style="line-height: 0.5;">The Heurekka team.</p>
             <br/>
             <br/> 
             <hr style="border: 0.5px solid rgb(186, 185, 185); width: 100%;"></hr>
             <br/> 
-            <p style="font-size: 14px; color: grey">Powered by Heurekka.</p>
             <p style="font-size: 14px; color: grey">Find, Connect & Share with the best Creators, Developers & Designers.</p>
         </div>`,
       headers: {
-        "Content-Type": "multipart/mixed",
+        "Content-Type": "text/html",
       },
     });
 
@@ -51,7 +48,6 @@ const sendPasswordReset = async (email, fullname, resetPasswordCode) => {
     return { msg: "Error sending email", error };
   }
 };
-
 const sendOTP = async (email, otp) => {
   try{
     const info = await transport
