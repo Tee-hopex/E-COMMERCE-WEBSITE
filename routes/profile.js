@@ -9,7 +9,7 @@ const Cart = require('../models/cart');
 const Address = require('../models/address');
 
 const uploader = require("../utils/multer");
-// const { decryptObject, encryptObject } = require('../encrypt');+
+const { decryptObject, encryptObject } = require('../encrypt');
 
 const route = express.Router();
 
@@ -344,24 +344,27 @@ route.post('/new_address', async (req, res) => {
     }
 });
 
+
+/**
+ * Endpoint to add card details
+ * @param {object} card_details the object that stores the card details
+ * format: {
+      card_number: Number,
+      holders_name: String,
+      mm_yy: String,
+      cvv: Number
+    }
+ */
+
 // endpoint to add card details   
 route.post("/add_card", async (req, res) => {
-    const { token, card_number, holders_name, mm_yy, cvv } = req.body;
-
-    
-
-    if (!token || !card_number || !holders_name || !mm_yy || !cvv) {
+    const { token, card_details } = req.body;
+ 
+    if (!token || !card_details) {
         return res.status(400).send({ status: "error", msg: "required fields must be filled" });
     }
 
     try {
-
-        const card_details = {
-            card_number : card_number,
-            holders_name: holders_name,
-            mm_yy: mm_yy,
-            cvv: cvv
-        }
         // token verification
         const user = jwt.verify(token, process.env.JWT_SECRET);
 

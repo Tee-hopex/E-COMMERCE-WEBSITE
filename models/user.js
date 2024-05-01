@@ -17,10 +17,7 @@ const userSchema = new mongoose.Schema({
     timestamp: {type: Number, default: Date.now()},
     is_online: {type: Boolean, default: true},
     is_deleted: {type: Boolean, default: false},
-    card_details : [{card_number: Number,
-        holders_name: String,
-        mm_yy: String,
-        cvv: Number}],    
+    card_details : String,    
 }, {collection: 'users'});
 
 const model = mongoose.model('User', userSchema);

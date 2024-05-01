@@ -34,7 +34,6 @@ route.post('/sign_up', async (req, res) => {
         user.cart = "";
         user.address = [];
         user.saved_item = [];
-        user.card_details = [];
         user.orders = [];
        
         // save my document on mongodb
