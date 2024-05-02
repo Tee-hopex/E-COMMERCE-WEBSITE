@@ -31,8 +31,6 @@ route.post('/sign_up', async (req, res) => {
         user.password = await bcrypt.hash(password, 10);
         user.phone_no = phone_no;
         user.email = email;
-        user.cart = "";
-        user.address = [];
         user.saved_item = [];
         user.orders = [];
        

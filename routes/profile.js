@@ -311,39 +311,6 @@ route.post('/view_pending_order', async (req, res) => {
     
 })
 
-//  new Address
-route.post('/new_address', async (req, res) => {
-    const {token, username, phone_no, address, city, state} = req.body; // Destructuring the request body
-
-    if (!token) return res.status(400).send({status: "Error", msg: "token required"})
-    // Checking if any required field is missing
-    if (!username || !phone_no || !address || !city || !state) {
-        return res.status(400).send({ "status": "error", "msg": "All field must be filled" });
-    }
-
-    try {
-        
-                    
-        // create user document
-        const address = new Address();
-        address.username = username;
-        address.phone_no = phone_no;
-        address.address = address;
-        address.city = city;
-        address.state = state;
-        
-        // save my document on mongodb
-        await address.save();
-
-        return res.status(200).send({status: 'ok', msg: 'success', address});
-
-    } catch (error) {
-        console.error(error);
-        // Sending error response if something goes wrong
-        res.status(500).send({ "status": "some error occurred", "msg": error.message });
-    }
-});
-
 
 /**
  * Endpoint to add card details

@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     order_count: Number,
     cart: String,
     item_in_cart: Number,
-    address: [String],
+    address: String,
     saved_item_count: {type: Number, default: 0},
     saved_item: [String],
     timestamp: {type: Number, default: Date.now()},

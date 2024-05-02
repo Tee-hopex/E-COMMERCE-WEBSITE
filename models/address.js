@@ -4,10 +4,16 @@ const addressSchema = new mongoose.Schema({
     
     username: String,
     user_id: String, 
-    phone_no: String,
-    address: String,
-    city: String,
-    state: String,
+    total_address: {type: Number, default: 1},
+    addresses: [
+        {
+            phone_no: String,
+            location: String,
+            city: String,
+            state: String,
+        }
+    ],
+    
     timestamp: {type: Number, default: Date.now()},
 }, {collection: 'address'});
 

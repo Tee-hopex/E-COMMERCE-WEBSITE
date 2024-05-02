@@ -28,6 +28,7 @@ app.use('/auth', require('./routes/auth'))
 app.use('/profile', require('./routes/profile'))
 app.use('/cart', require('./routes/cart'))
 app.use('/order', require('./routes/order'))
+app.use('/address', require('./routes/address'))
 
 
 
