@@ -47,8 +47,8 @@ route.post('/new_address', async (req, res) => {
         });
 
         return res.status(200).send({status: 'ok', msg: 'success', address});
-    } 
-    const address = await Address.findOne({user_id: user._id});
+    } else if (check){
+        const address = await Address.findOne({user_id: user._id});
 
         address.addresses.push({
             phone_no: phone_no,
@@ -63,6 +63,8 @@ route.post('/new_address', async (req, res) => {
         await address.save();
 
         return res.status(200).send({status: 'ok', msg: 'success', address});
+    } else {return res.status(400).send({status: 'Error', msg: 'Error occured'}); }
+    
 
     } catch (error) {
         console.error(error);
