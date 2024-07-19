@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     item_in_cart: Number,
     address: String,
     saved_item_count: {type: Number, default: 0},
-    saved_item: [String],
+    saved_item: String,
     timestamp: {type: Number, default: Date.now()},
     is_online: {type: Boolean, default: true},
     is_deleted: {type: Boolean, default: false},

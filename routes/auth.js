@@ -31,7 +31,7 @@ route.post('/sign_up', async (req, res) => {
         user.password = await bcrypt.hash(password, 10);
         user.phone_no = phone_no;
         user.email = email;
-        user.saved_item = [];
+        // user.saved_item = [];
         user.orders = [];
        
         // save my document on mongodb
@@ -208,32 +208,30 @@ route.post('/delete_user', async(req,res)=>{
     
 })
 
- 
+ // endpoint to send otp
+route.post('/send_otp', async (req, res) => {
+    const {token, otp, email } = req.body; // Destructuring the request body
 
-// // endpoint to send otp
-// route.post('/send_otp', async (req, res) => {
-//     const {token, otp, email } = req.body; // Destructuring the request body
+    // Checking if any required field is missing
+    if (!token || !otp || !email ) {
+        return res.status(400).send({ status: "error", msg: "all fields must be filled" });
+    }
 
-//     // Checking if any required field is missing
-//     if (!token || !otp || !email ) {
-//         return res.status(400).send({ status: "error", msg: "all fields must be filled" });
-//     }
+    try {
+        // token verification
+        jwt.verify(token, process.env.JWT_SECRET);
 
-//     try {
-//         // token verification
-//         jwt.verify(token, process.env.JWT_SECRET);
+        // send otp
+        sendOTP(email, otp);
 
-//         // send otp
-//         sendOTP(email, otp);
+        return res.status(200).send({status: 'ok', msg: 'success'});
 
-//         return res.status(200).send({status: 'ok', msg: 'success'});
-
-//     } catch (error) {
-//         console.error(error);
-//         // Sending error response if something goes wrong
-//         res.status(500).send({ status: "some error occurred", msg: error.message });
-//     }
-// });
+    } catch (error) {
+        console.error(error);
+        // Sending error response if something goes wrong
+        res.status(500).send({ status: "some error occurred", msg: error.message });
+    }
+});
 
 module.exports = route
 

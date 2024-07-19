@@ -86,7 +86,7 @@ route.post('/remove', async(req, res) => {
 
 // endpoint to cancel order
 route.post('/cancel_order', async (req, res) => {
-    const {order_id, token} = req.body;
+    const {token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
     if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
@@ -97,7 +97,7 @@ route.post('/cancel_order', async (req, res) => {
 
         const order = await Order.findByIdAndUpdate(order_id, {$set :{order_status : "cancelled" }}, {new:true});
 
-        await User.findByIdAndUpdate(user_id, {$pull : {orders: order_id}, $inc : {order_count: -1}});
+        await User.findByIdAndUpdate(user.id, {$pull : {orders: order_id}, $inc : {order_count: -1}});
 
         return res.status(200).send({status: "Success", msg: "Order cancelled successfully", order});
 
@@ -142,10 +142,10 @@ route.post('/delivered_order', async (req, res) => {
 
 // endpoint for viewing pending order
 route.post('/view_pending_order', async (req, res) => {
-    const {order_id, token} = req.body;
+    const {token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
-    if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
+    // if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
 
     try{
         const user = jwt.verify(token, process.env.JWT_SECRET);
@@ -171,7 +171,7 @@ route.post('/view_cancelled_order', async (req, res) => {
     const {order_id, token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required for action"});
-    if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
+    // if (!order_id) return res.status(400).send({status: "Error", msg: "order_id required for action"});
 
     try{
         const user = jwt.verify(token, process.env.JWT_SECRET);

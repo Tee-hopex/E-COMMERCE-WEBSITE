@@ -18,13 +18,20 @@ route.post('/add_to_cart', async (req, res) => {
         return res.status(400).send({ "status": "error", "msg": "All required field must be filled" });
     }
 
+    if (discount) {
+       dist = discount
+    } 
+    if (!discount) {
+       dist = 0
+    }
+
     try {
         // percentageCalculator function to help run the calculation
-        function percentageCalculator (item_cost, discount, ){
-            const discount_amount = (item_cost * (discount / 100))
+        function percentageCalculator (item_cost, dist, ){
+            const discount_amount = (item_cost * (dist / 100))
             return (item_cost - discount_amount)
          }
-         const discounted_cost = percentageCalculator(item_cost, discount)
+         const discounted_cost = percentageCalculator(item_cost, dist)
          
          const total = ((discounted_cost * number_ordered))
         
@@ -47,7 +54,7 @@ route.post('/add_to_cart', async (req, res) => {
           color : color,
           item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
-          discount : discount,
+          discount : dist,
           discounted_cost : discounted_cost,
           number_ordered : number_ordered,
           total : total,
@@ -97,7 +104,7 @@ route.post('/add_to_cart', async (req, res) => {
           color : color,
           item_cost : item_cost * number_ordered,
           item_img_url : item_img_url || "",
-          discount : discount,
+          discount : dist,
           discounted_cost : discounted_cost,
           number_ordered : number_ordered,
           total : total,

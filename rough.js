@@ -46,3 +46,10 @@
 // discounted_cost = discounted_cost;
 // number_ordered = number_ordered;
 // total = total;
+
+// var name = "hope";
+// console.log(name);
+
+// var name = "Truth";
+// console.log(name)
+

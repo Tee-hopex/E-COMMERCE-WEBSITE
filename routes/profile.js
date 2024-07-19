@@ -219,7 +219,7 @@ route.post('/view_pending_order', async (req, res) => {
 })
 
 // view delivered order
-route.post('/view_pending_order', async (req, res) => {
+route.post('/view_delivered_order', async (req, res) => {
     const {token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required"})
@@ -250,7 +250,7 @@ route.post('/view_pending_order', async (req, res) => {
 })
 
 // view cancelled order
-route.post('/view_pending_order', async (req, res) => {
+route.post('/view_cancelled_order', async (req, res) => {
     const {token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required"})
@@ -281,7 +281,7 @@ route.post('/view_pending_order', async (req, res) => {
 })
 
 // view Saved Item
-route.post('/view_pending_order', async (req, res) => {
+route.post('/view_saved_item', async (req, res) => {
     const {token} = req.body;
 
     if (!token) return res.status(400).send({status: "Error", msg: "token required"})
